@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz App</title>
+  <link rel="stylesheet" type="text/css" href="quiz-style.css">
+</head>
+
+<body>
+  <div class="container">
+    <h1>Quiz App</h1>
+    <form id="registration-form">
+      <input type="text" id="user-name" placeholder="UserName">
+      <input type="text" id="email" placeholder="Email">
+      <div id="categorys">Select Category</div>
+        <br/>
+        <input type="radio" id="film" name="category" value="11">
+        <label for="film">Entertainment: Film</label><br>
+        <input type="radio" id="book" name="category" value="10">
+        <label for="book">Entertainment: Books</label><br>
+        <input type="radio" id="art" name="category" value="25">
+        <label for="art">Art</label> <br/>
+        <input type="radio" id="geo" name="category" value="22">
+        <label for="geo">Geography</label>
+        <br/>
+      <input type="number" id="number-question" placeholder="Select number of questions">
+      <br/>
+      <input type="radio" id="easy" name="level" value="easy">
+      <label for="easy">Easy</label><br>
+      <input type="radio" id="medium" name="level" value="medium">
+      <label for="medium">Medium</label><br>
+      <input type="radio" id="hard" name="level" value="hard">
+      <label for="hard">Hard</label>
+      <br/>
+      <button type="submit">Register</button>
+    </form>
+    <div id="quiz-questions">
+
+    </div>
+    <div id="error-block">
+        
+    </div>
+</div>
+</body>
+</html>
+
+<script>
+    document.getElementById('registration-form')?.addEventListener('submit', function(event) {
+
+        event.preventDefault();
+        console.log(document.getElementById('number-question'));
+
+        var numberOfQuestions = document.getElementById('number-question').value;
+
+        var level = document.querySelector('input[name="level"]:checked').value;
+        var questionCategory = document.querySelector('input[name="category"]:checked').value;
+
+        fetch('https://opentdb.com/api.php?amount='+ numberOfQuestions + ' &category= ' + questionCategory + '&difficulty=' + level +'&type=' + 'multiple')
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error(response.status);
+            }
+            return response.json();      
+        })
+        .then(function(data) {
+            console.log(data);
+            trial(data)
+            console.log(JSON.stringify(data))
+            localStorage.setItem("data",JSON.stringify(data));
+            window.open("quiz-screen.html");
+            //trial(data)
+            //showQuestions(data);
+        })
+        
+        
+
+        .catch(function(error) {
+            displayError(error);
+        });
+
+    });
+
+    function showQuestions(questions) {
+        console.log(questions)
+        const questionElement = document.getElementById('quiz-questions');
+        
+
+        console.log("This is trial")
+        console.log(questions['results'])
+        console.log(questions['results'][0]) 
+        category=questions['results'][0]['category']
+        question=questions['results'][0]['question']
+        correct_answer=questions['results'][0]['correct_answer']
+        // Add for options as well​
+        questionElement.innerHTML = '<p>' + questions.results + '</p>'
+        questionElement.innerHTML = '<p>' + category + '</p>' + question + '<hr>' + correct_answer
+
+
+    }
+
+    function displayError(error) {
+        var questionElement = document.getElementById('error-block');
+        console.log(questionElement)
+        questionElement.innerHTML = '<p>Error: ' + error.message + '</p>';
+    }
+
+    function trial(data)
+    {
+     console.log("This is trial")
+     console.log(data['results'])
+     console.log(data['results'][0]) 
+     console.log(data['results'][0]['category'])
+     console.log(data['results'][0]['question'])
+     console.log(data['results'][0]['correct_answer'])
+
+
+    }
+
+</script>

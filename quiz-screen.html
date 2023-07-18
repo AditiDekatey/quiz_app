@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz App</title>
+  <link rel="stylesheet" type="text/css" href="quiz-style.css">
+</head>
+
+<body>
+  <div class="container">
+    <h1>Quiz App</h1>
+    <div id="main-question"></div>   
+    <div id="quiz-questions">
+    <div id="question">
+        <p></p>
+    </div>
+    <div class="option">
+        <input type="radio" id="option1" name="answers"value="A">
+        <label for="option1" id="opt1"></label>
+    </div>
+
+    <div class="option">
+        <input type="radio" id="option2" name="answers"value="B">
+        <label for="option2" id="opt2">B</label>
+    </div>
+
+    <div class="option">
+        <input type="radio" id="option3" name="answers" value="C">
+        <label for="option3" id="opt3">C</label>
+    </div>
+
+    <div class="option">
+        <input type="radio" id="option4" name="answers" value="D">
+        <label for="option4" id="opt4">D</label>
+    </div>
+
+
+
+    </div>
+    <div>
+        <button type="button" onclick='nextquestion()'>Next</button>
+    </div>
+    <div id="error-block">
+        
+    </div>
+</div>
+</body>
+</html>
+
+<script>
+    console.log("Im in a new screen ")
+    console.log(localStorage.getItem("data"))
+    var data=JSON.parse(localStorage.getItem('data'))
+    var question_no=0;
+    var no_of_questions=data['results'].length;
+    console.log(no_of_questions)
+    console.log(data)
+    console.log(data['results']) 
+    console.log(data['results'][0]['category'])
+    console.log(data['results'][0]['question'])
+    console.log(data['results'][0]['correct_answer'])
+    showQuestions(data)
+    document.getElementById('registration-form')?.addEventListener('submit', function(event) {
+
+        event.preventDefault();
+        console.log(document.getElementById('number-question'));
+
+        var numberOfQuestions = document.getElementById('number-question').value;
+
+        var level = document.querySelector('input[name="level"]:checked').value;
+        var questionCategory = document.querySelector('input[name="category"]:checked').value;
+
+        fetch('https://opentdb.com/api.php?amount='+ numberOfQuestions + ' &category= ' + questionCategory + '&difficulty=' + level +'&type=' + 'multiple')
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error(response.status);
+            }
+            return response.json();      
+        })
+        .then(function(data) {
+            console.log(data);
+            //trial(data)
+            showQuestions(data);
+        })
+
+        .catch(function(error) {
+            displayError(error);
+        });
+
+    });
+    function shuffle(options){
+        console.log("Im in shuffle function");
+
+        var random=Math.floor(Math.random() * 4);
+        console.log("Random",random);
+        console.log(options[0]);
+        var temp=options[0];
+        console.log("temp",temp);
+        options[0]=options[random];
+        console.log(options[0],options[random]);
+        options[random]=temp;
+        console.log(options[0],options[random])
+      
+        return options
+     }
+
+    function showQuestions(questions) {
+        
+        //const questionElement = document.getElementById('quiz-questions');
+        //const question=document.getElementById('question')
+       
+
+        console.log("This is trial")
+        console.log(questions['results'])
+        console.log(questions['results'].length)
+        console.log(questions['results'][0]) 
+        category=questions['results'][0]['category']
+        
+        // Add for options as well​
+        
+        var question_no=0;
+        var no_of_questions = questions['results'].length;
+        current_question=questions['results'][question_no]['question']
+        correct_answer=questions['results'][question_no]['correct_answer']
+        console.log(no_of_questions)
+        console.log(current_question)
+        question.innerHTML='<p>' + current_question +'</p>'
+        singleQuestion(question_no,questions)
+        //questionElement.innerHTML = '<p>' + category + '</p>' + current_question + '<hr>' + correct_answer
+        /*var optionx=document.getElementById('option'+1)
+        optionx.value= correct_answer
+        console.log(optionx.value)
+
+        var op1=document.getElementById('opt1')
+        opt1.innerHTML=correct_answer 
+        var i=0;
+        var incorrect_array=questions['results'][0]['incorrect_answers']
+        console.log(incorrect_array[0],incorrect_array[1],incorrect_array[2])
+
+
+        for(i=0;i<3;i++)
+        {
+            var option=document.getElementById('option'+(i+1))
+            console.log(incorrect_array[i])
+            console.log(option)
+            option.value=incorrect_array[i];
+            console.log(option.value)
+
+            var op=document.getElementById('opt'+(i+1))
+            op.innerHTML=incorrect_array[i]
+
+        }
+        var option=document.getElementById('option'+4)
+        option.value=correct_answer;
+        console.log(option.value)
+        var op=document.getElementById('opt'+(i+1))
+            op.innerHTML=correct_answer */
+        
+
+
+    }
+
+    function displayError(error) {
+        var questionElement = document.getElementById('error-block');
+        console.log(questionElement)
+        questionElement.innerHTML = '<p>Error: ' + error.message + '</p>';
+    }
+
+    function singleQuestion(question_no,questions)
+    {
+        if(question_no >= no_of_questions)
+        {
+            window.alert("Quiz has been completed");
+        }
+    
+        console.log("I have reached single question function")
+        const questionElement = document.getElementById('quiz-questions');
+        const question=document.getElementById('question')
+        
+    
+        category=questions['results'][0]['category']
+        current_question=questions['results'][question_no]['question']
+        correct_answer=questions['results'][question_no]['correct_answer']
+        var incorrect_array=questions['results'][question_no]['incorrect_answers']
+        console.log(incorrect_array[0],incorrect_array[1],incorrect_array[2])
+        question.innerHTML='<p>'+current_question+'</p>';
+
+        var options=[correct_answer,incorrect_array[0],incorrect_array[1],incorrect_array[2]]
+        console.log(options)
+        var shuffled_array=shuffle(options)
+        console.log("Shuffled_array",shuffled_array)
+        
+
+        /*
+        for(i=0;i<3;i++)
+        {
+            var option=document.getElementById('option'+(i+1))
+            console.log(incorrect_array[i])
+            console.log(option)
+            option.value=incorrect_array[i];
+            console.log(option.value)
+
+            var op=document.getElementById('opt'+(i+1))
+            op.innerHTML=incorrect_array[i]
+
+        }
+        var option=document.getElementById('option'+4)
+        option.value=correct_answer;
+        console.log(option.value)
+        var op=document.getElementById('opt'+(i+1))
+            op.innerHTML=correct_answer
+        */
+
+        for(i=0;i<4;i++)
+        {
+            var option=document.getElementById('option'+(i+1))
+            console.log(options[i])
+            console.log(option);
+            option.value=options[i];
+            console.log(option.value);
+
+            var op=document.getElementById('opt'+(i+1));
+            op.innerHTML=option.value;
+        }
+    }
+    function nextquestion(){
+        console.log("The onclick has been clicked")
+        if(question_no<no_of_questions)
+        {question_no=question_no+1;
+        console.log(question_no)
+        singleQuestion(question_no,data)
+        }
+        else {
+            console.log("Quiz has been completed")
+            exit()
+        }
+      
+    }
+    
+
+    function trial(data)
+    {
+     console.log("This is trial")
+     console.log(data['results'])
+     console.log(data['results'][0]) 
+     console.log(data['results'][0]['category'])
+     console.log(data['results'][0]['question'])
+     console.log(data['results'][0]['correct_answer'])
+
+
+    }
+
+</script>
