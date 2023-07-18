@@ -6,31 +6,32 @@
   <link rel="stylesheet" type="text/css" href="quiz-style.css">
 </head>
 
-<body>
+<body >
   <div class="container">
     <h1>Quiz App</h1>
+    <div id="safeTimerDisplay"></div>
     <div id="main-question"></div>   
     <div id="quiz-questions">
     <div id="question">
         <p></p>
     </div>
     <div class="option">
-        <input type="radio" id="option1" name="answers"value="A">
+        <input type="radio" id="option1" name="answers"value="A" checked=false>
         <label for="option1" id="opt1"></label>
     </div>
 
     <div class="option">
-        <input type="radio" id="option2" name="answers"value="B">
+        <input type="radio" id="option2" name="answers"value="B" checked=false>
         <label for="option2" id="opt2">B</label>
     </div>
 
     <div class="option">
-        <input type="radio" id="option3" name="answers" value="C">
+        <input type="radio" id="option3" name="answers" value="C" checked=false>
         <label for="option3" id="opt3">C</label>
     </div>
 
     <div class="option">
-        <input type="radio" id="option4" name="answers" value="D">
+        <input type="radio" id="option4" name="answers" value="D" checked=false>
         <label for="option4" id="opt4">D</label>
     </div>
 
@@ -38,7 +39,8 @@
 
     </div>
     <div>
-        <button type="button" onclick='nextquestion()'>Next</button>
+        <button type="button" id="Submit" onclick='check_answers()'>Submit</button>
+        <button type="button" id="Next" onclick='nextquestion()'>Next</button>
     </div>
     <div id="error-block">
         
@@ -48,10 +50,16 @@
 </html>
 
 <script>
+
+   // const timer = setInterval(start_timer(),1000);
+    //var secondlimit = 20;
+    //timer_repeat()
     console.log("Im in a new screen ")
     console.log(localStorage.getItem("data"))
     var data=JSON.parse(localStorage.getItem('data'))
     var question_no=0;
+    var score=0;
+    var time_status=0;
     var no_of_questions=data['results'].length;
     console.log(no_of_questions)
     console.log(data)
@@ -59,6 +67,7 @@
     console.log(data['results'][0]['category'])
     console.log(data['results'][0]['question'])
     console.log(data['results'][0]['correct_answer'])
+
     showQuestions(data)
     document.getElementById('registration-form')?.addEventListener('submit', function(event) {
 
@@ -88,6 +97,27 @@
         });
 
     });
+ 
+
+    function timer_repeat(){
+        var count = 15;
+        var interval = setInterval(function(){
+        document.getElementById('safeTimerDisplay').innerHTML=count;
+        count--;
+        if (count === 0){
+        clearInterval(interval);
+        document.getElementById('safeTimerDisplay').innerHTML='Timeup';
+        time_status="Timeup";
+        }
+        document.getElementById('Submit').addEventListener("click",()=>{
+            clearInterval(interval);
+            document.getElementById('safeTimerDisplay').innerHTML='Done in time';
+            time_status="Done in time";
+
+        })
+
+}, 1000);
+    }
     function shuffle(options){
         console.log("Im in shuffle function");
 
@@ -122,10 +152,12 @@
         var no_of_questions = questions['results'].length;
         current_question=questions['results'][question_no]['question']
         correct_answer=questions['results'][question_no]['correct_answer']
-        console.log(no_of_questions)
-        console.log(current_question)
-        question.innerHTML='<p>' + current_question +'</p>'
-        singleQuestion(question_no,questions)
+        console.log(no_of_questions);
+        console.log(current_question);
+        question.innerHTML='<p>' + current_question +'</p>';
+        var score=0;
+
+        singleQuestion(question_no,questions);
         //questionElement.innerHTML = '<p>' + category + '</p>' + current_question + '<hr>' + correct_answer
         /*var optionx=document.getElementById('option'+1)
         optionx.value= correct_answer
@@ -155,11 +187,39 @@
         console.log(option.value)
         var op=document.getElementById('opt'+(i+1))
             op.innerHTML=correct_answer */
+
+    } 
+    /*   
+    function start_timer(){
+    var sec = 20;
+    var timer = setInterval(function(){
+        document.getElementById('safeTimerDisplay').innerHTML='00:'+sec;
+        sec--;
+        if (sec < 0) {
+            document.getElementById('safeTimerDisplay').innerHTML="Timeup";
+            clearInterval(timer);
+        }
+    }, 1000);
+   
+}
+*/
+
+function start_timer(){
+    var sec = 20;
+    document.getElementById('safeTimerDisplay').innerHTML='00:'+sec;
+    sec--;
+    if (sec < 0) {
+            document.getElementById('safeTimerDisplay').innerHTML="Timeup";
+            clearInterval(timer);
+    }
+}
+    function stoptimer(){
+        console.log("Im stopping time");
+        clearInterval(timer);
+        document.getElementById('safeTimerDisplay').innerHTML="Submiited on time";
         
 
-
     }
-
     function displayError(error) {
         var questionElement = document.getElementById('error-block');
         console.log(questionElement)
@@ -168,9 +228,11 @@
 
     function singleQuestion(question_no,questions)
     {
+        timer_repeat()
+        
         if(question_no >= no_of_questions)
         {
-            window.alert("Quiz has been completed");
+            window.alert("Quiz has been completed\n.Score is"+score);
         }
     
         console.log("I have reached single question function")
@@ -189,6 +251,8 @@
         console.log(options)
         var shuffled_array=shuffle(options)
         console.log("Shuffled_array",shuffled_array)
+
+       
         
 
         /*
@@ -210,7 +274,7 @@
         var op=document.getElementById('opt'+(i+1))
             op.innerHTML=correct_answer
         */
-
+        //start_timer(timer);
         for(i=0;i<4;i++)
         {
             var option=document.getElementById('option'+(i+1))
@@ -223,12 +287,65 @@
             op.innerHTML=option.value;
         }
     }
+    function check_answers(){
+            //stoptimer(timer);
+            console.log('Im inside check_answers');
+            var select=document.querySelector('input[name="answers"]:checked')
+            console.log(select);
+            var selected=document.querySelector('input[name="answers"]:checked').value;
+            console.log("Selected:",selected);
+            console.log("correct",data['results'][question_no]['correct_answer']);
+            var correct=data['results'][question_no]['correct_answer'];
+            var par=select.parentElement;
+            var correction=0;
+            console.log(time_status);
+          
+            if(correct==selected)
+            {
+                score+=1;
+                console.log("score",score);
+                correction=1;
+                var par=select.parentElement
+                par.classList.add('correct');
+            
+            }
+            if(correct!=selected)
+            {
+                score+=0;
+                console.log("Score:",0);
+                correction=0;
+                var par=select.parentElement;
+                par.classList.add('incorrect');
+
+            }
+            
+            
+        }
+        function change(){
+            var achange=document.getElementsByClassName('option');
+            console.log(achange);
+            var i=0;
+            for(i=0;i<4;i++)
+            {
+                console.log(achange[i]);
+                achange[i].classList.remove('incorrect');
+                achange[i].classList.remove('correct');
+
+            }
+            
+        
+
+        }
+    
     function nextquestion(){
         console.log("The onclick has been clicked")
+        //check_answers()
+        change()
         if(question_no<no_of_questions)
         {question_no=question_no+1;
         console.log(question_no)
-        singleQuestion(question_no,data)
+        singleQuestion(question_no,data);
+
         }
         else {
             console.log("Quiz has been completed")

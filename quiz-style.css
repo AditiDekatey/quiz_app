@@ -68,5 +68,20 @@ body {
   }
   
   
-  
-  
+  .option{
+    text-align: left;
+    background-color:#ffffff;
+  }
+  .correct{
+    background-color: green;
+    font-style:bold;
+
+  }
+  .incorrect{
+    background-color: red;
+    font-style: bold;
+  }
+  .normal{
+    background-color: white;
+    font-style: unset;
+  }
