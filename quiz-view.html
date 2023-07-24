@@ -9,7 +9,7 @@
 <body>
   <div class="container">
     <h1>Quiz App</h1>
-    <form id="registration-form">
+    <form id="registration-form">   <!-- The form  and its elements-->
       <input type="text" id="user-name" placeholder="UserName">
       <input type="text" id="email" placeholder="Email">
       <div id="categorys">Select Category</div>
@@ -34,7 +34,7 @@
       <br/>
       <button type="submit">Register</button>
     </form>
-    <div id="quiz-questions">
+    <div id="quiz-questions">  <!--Part of starter code ,not used,displayed on different tab-->
 
     </div>
     <div id="error-block">
@@ -45,46 +45,81 @@
 </html>
 
 <script>
+    //Code to run on clicking submit button
     document.getElementById('registration-form')?.addEventListener('submit', function(event) {
 
         event.preventDefault();
-        console.log(document.getElementById('number-question'));
-
+        
+        //fetch input values and store in variable 
         var numberOfQuestions = document.getElementById('number-question').value;
-
+        var name=document.getElementById('user-name').value;
+        var email=document.getElementById('email').value;
+        
+        //Checking if radio buttons are selected and fetching category,level only post that.
+        var check1=document.querySelector('input[name="category"]:checked');
+        var check2=document.querySelector('input[name="level"]:checked');
+        
+        if(check1!=null)
+        {
+            var questionCategory = document.querySelector('input[name="category"]:checked').value;   
+        }
+        if(check2!=null)
+        {
         var level = document.querySelector('input[name="level"]:checked').value;
-        var questionCategory = document.querySelector('input[name="category"]:checked').value;
+        }
+        
+        
+        //Defining regex to test email
+        let regex = new RegExp('[a-z0-9]+@[a-z]+.[a-z]{2,3}');
+        console.log(regex.test(email));
+        console.log("email",email.match(regex));
 
+        //Fetching data through API after validations(throw error)
+        
         fetch('https://opentdb.com/api.php?amount='+ numberOfQuestions + ' &category= ' + questionCategory + '&difficulty=' + level +'&type=' + 'multiple')
         .then(function(response) {
             if (!response.ok) {
                 throw new Error(response.status);
             }
+            if(numberOfQuestions<5){
+                console.log("Im in no.")
+                throw new Error("Atleast 5 Questions");
+            }
+            if(name===null || name===""){
+                throw new Error("Enter your name");
+            }
+            if(email===null || regex.test(email)==false)
+            {
+                throw new Error("Please enter valid email")
+            }
+            if(check1===null)
+            {
+                throw new Error("Please select a category");  
+            }
+            if(check2===null){
+                throw new Error("Please select a level");
+            }
+           
             return response.json();      
         })
         .then(function(data) {
-            console.log(data);
+            //Converting json to string and setting local storage
             trial(data)
             console.log(JSON.stringify(data))
             localStorage.setItem("data",JSON.stringify(data));
             window.open("quiz-screen.html");
-            //trial(data)
-            //showQuestions(data);
+            
         })
-        
-        
-
         .catch(function(error) {
+            //displays errors of validation or api in error block.Function below
             displayError(error);
         });
 
     });
-
+    //Not used here,Only kept as it was part of starter code 
     function showQuestions(questions) {
         console.log(questions)
         const questionElement = document.getElementById('quiz-questions');
-        
-
         console.log("This is trial")
         console.log(questions['results'])
         console.log(questions['results'][0]) 
@@ -94,16 +129,14 @@
         // Add for options as well​
         questionElement.innerHTML = '<p>' + questions.results + '</p>'
         questionElement.innerHTML = '<p>' + category + '</p>' + question + '<hr>' + correct_answer
-
-
     }
-
+    //Function that displays error in error block
     function displayError(error) {
         var questionElement = document.getElementById('error-block');
         console.log(questionElement)
-        questionElement.innerHTML = '<p>Error: ' + error.message + '</p>';
+        questionElement.innerHTML = '<p>' + error.message + '</p>';
     }
-
+    //Initially used to test how data can be extracted
     function trial(data)
     {
      console.log("This is trial")
@@ -112,8 +145,6 @@
      console.log(data['results'][0]['category'])
      console.log(data['results'][0]['question'])
      console.log(data['results'][0]['correct_answer'])
-
-
     }
 
 </script>
